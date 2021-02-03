@@ -1,0 +1,12 @@
+C:\Users\carlos\Desktop\Trabajo\SIGEF\SIGEF.Entidades\bin\Debug\SIGEF.Entidades.dll
+C:\Users\carlos\Desktop\Trabajo\SIGEF\SIGEF.Entidades\bin\Debug\SIGEF.Entidades.pdb
+C:\Users\carlos\Desktop\Trabajo\SIGEF\SIGEF.Entidades\obj\Debug\SIGEF.Entidades.csprojAssemblyReference.cache
+C:\Users\carlos\Desktop\Trabajo\SIGEF\SIGEF.Entidades\obj\Debug\SIGEF.Entidades.csproj.CoreCompileInputs.cache
+C:\Users\carlos\Desktop\Trabajo\SIGEF\SIGEF.Entidades\obj\Debug\SIGEF.Entidades.dll
+C:\Users\carlos\Desktop\Trabajo\SIGEF\SIGEF.Entidades\obj\Debug\SIGEF.Entidades.pdb
+C:\Users\Charly\Documents\Trabajo\SIGEF\SIGEF.Entidades\bin\Debug\SIGEF.Entidades.dll
+C:\Users\Charly\Documents\Trabajo\SIGEF\SIGEF.Entidades\bin\Debug\SIGEF.Entidades.pdb
+C:\Users\Charly\Documents\Trabajo\SIGEF\SIGEF.Entidades\obj\Debug\SIGEF.Entidades.csprojAssemblyReference.cache
+C:\Users\Charly\Documents\Trabajo\SIGEF\SIGEF.Entidades\obj\Debug\SIGEF.Entidades.csproj.CoreCompileInputs.cache
+C:\Users\Charly\Documents\Trabajo\SIGEF\SIGEF.Entidades\obj\Debug\SIGEF.Entidades.dll
+C:\Users\Charly\Documents\Trabajo\SIGEF\SIGEF.Entidades\obj\Debug\SIGEF.Entidades.pdb

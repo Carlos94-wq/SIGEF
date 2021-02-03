@@ -1,0 +1,97 @@
+﻿<div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Paper Detail</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <input class="d-none" type="text"  id="idponencia"/>
+            <div class="modal-body">
+                <div class="form-group">
+                    <button id="CreateSheet" class="btn btn-info fa fa-file"> Assessment Sheet</button>
+                </div>
+                <div class="form-group" id="sheetLoader"></div>
+                <div id="alertEstatus"></div>
+
+                <form id="detailForm">
+                    <input type="text" id="idponencia" class="d-none" />
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label style="color: #000; font-size: 18px;">Title paper</label>
+                            <input type="text" class="form-control" readonly id="titlePaper" />
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label style="color: #000; font-size: 18px;">
+                                Main Topic
+                            </label>
+                            <input type="text" readonly class="form-control" id="line" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label style="color: #000; font-size: 18px;">Abstract</label>
+                            <textarea readonly class="form-control" id="description"></textarea>
+                        </div>
+                    </div>
+
+                    <!--Tabla de colaboradores--->
+                    <div class="form-row mt-5 shadow">
+                        <table id="colaboradores" class="table">
+                            <thead>
+                                <tr>
+                                    <th>Participant Name</th>
+                                    <th>Collaborator Rol</th>
+                                </tr>
+                            </thead>
+                            <tbody id="row"></tbody> <!--los colaboradores se escriben con js--->
+                        </table>
+                    </div>
+
+                    <div id="formInputFile">
+                        <div class="form-row mt-4 mb-3">
+                            <button type="button" id="btnUpdateFiles" class="btn btn-info"><span class="fa fa-upload"></span>Update Files</button>
+                            <div id="uploadTarget" class="ml-2"></div>
+                        </div>
+
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label style="color: #000; font-size: 18px;">Title paper</label>
+                                <input class="form-control" id="Cover" type="file" />
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label style="color: #000; font-size: 18px;">Full Paper</label>
+                                <input class="form-control" id="Lecture" type="file" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Tabla de Aarchivos--->
+                    <div class="form-row shadow mt-3" id="TablaArchivos">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>File</th>
+                                    <th>Upload Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rowFiles"></tbody> <!--Selecciona input file que ya estan escritos por js--->
+                        </table>
+                    </div>
+
+                    <div id="comentarios" class="form-row mt-5">
+                        <div class="form-group col-md-12" id="coments">
+                            <label style="color: #000; font-size: 18px;">Paper Comments</label>
+                            <textarea id="txtComentarios" readonly class="form-control"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

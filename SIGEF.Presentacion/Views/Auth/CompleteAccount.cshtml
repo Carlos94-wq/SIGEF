@@ -1,0 +1,133 @@
+﻿
+@{
+    ViewBag.Title = "CompleteAccount";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+
+
+<div class="jumbotron">
+    <h1 class="display-4">Hello, User!</h1>
+    <p class="lead">
+        A verification code has been sent to your email which you must enter to finish your registration process.
+    </p>
+    <hr class="my-4">
+    <p>
+        If you did not receive a verification code, you can request a new one.
+	<hr />
+	Code verification expires in 10 minutes <br />
+	All accounts that are not confirmed will be deleted within 24 hours.
+
+    </p>
+    @using (Html.BeginForm("", "", FormMethod.Post, new { id = "complete" }))
+    {
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>Email:</label>
+                <input type="text" id="Email" name="txtUsuario" readonly class="form-control" />
+            </div>
+        </div>
+        <div class="form-row" id="divContra">
+            <div class="form-group col-md-6">
+                <label>verification code:</label>
+                <input type="text" id="code" class="form-control" name="txtCode" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fa fa-sign-in" aria-hidden="true"></i>
+                    Confirm
+                </button>
+            </div>
+            <div class="form-group col-md-3">
+                <button type="button" id="btnSend" class="btn btn-primary btn-block">
+                    <i class="fa fa-sign-in" aria-hidden="true"></i>
+                    I do not recive any code
+                </button>
+            </div>
+        </div>
+    }
+</div>
+@section scripts{
+
+    <script>
+
+        const email = sessionStorage.getItem('email');
+        const password = sessionStorage.getItem('contra');
+
+        //Setea el correo que viene del storage
+        $('#Email').val(email);
+
+        const HandleConfirm = (model) => {
+            $.ajax({
+                url: '@Url.Action("CompleteAccount")',
+                method: 'POST',
+                data: model,
+                success: (resp) => {
+                    if (resp.isComplete) {
+
+                        if( resp.rol == 4 ){
+		                sessionStorage.setItem('name', resp.name + " " + resp.apellidos);
+                                sessionStorage.setItem('rol', resp.rol);
+                                sessionStorage.setItem('idUsuario', resp.idUsuario)
+                                window.location.href = resp.url;
+		           }
+
+                    } else {
+                        alertify.error("It seems that code is not allowed");
+                    }
+                }
+            })
+        }
+        const HandleCode = (model) => {
+            $.ajax({
+                url: '@Url.Action("SendCode")',
+                method: 'POST',
+                data: model,
+                success: (resp) => {
+                    if (resp) {
+                        alertify.success("A Verify code has been send to " + email);
+                    }
+                }
+            })
+        }      
+
+        $('#complete').validate({
+            errorClass: 'is-invalid',
+            validClass: 'is-valid',
+            rules: {
+                txtCode: {
+                    required: true,
+                    maxlength: 6,
+                    digits: true
+                }
+            },
+            submitHandler: () => {
+
+                const Model = {
+                    Email: email,
+                    Contrasenia: password,
+                    Codigo: $('#code').val()
+                };
+
+                HandleConfirm(Model);
+            }
+        })
+
+        $('#btnSend').on('click', (e) => {
+
+            e.preventDefault();
+
+            const Model = {
+                email: email,
+                contra: password
+            };
+
+            HandleCode( Model );
+
+        })
+
+    </script>
+
+
+}

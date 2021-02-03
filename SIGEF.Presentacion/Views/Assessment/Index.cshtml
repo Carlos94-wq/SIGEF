@@ -1,0 +1,182 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Assessment Sheet</h2>
+<div class="mt-5" >
+    <form id="Sheet">
+        <div id="loader"></div>
+        <div id="cuestionario"></div> 
+        <div id="suggestions"></div>
+        <div id="Acording"></div>
+        <div>
+            <button id="btnCrearSheet" class="btn btn-info">Give answer</button>
+            <a href="@Url.Action("InReviewComite","Main")" class="fa fa-arrow-circle-left nav-item"> My Papers</a>
+        </div>
+    </form>
+    <div id="assesmentsLoader"></div>
+</div>
+
+@section scripts{
+    <script>
+
+        const Loader = (Target, isShowed) => {
+
+            const div = document.getElementById(Target);
+
+            if (isShowed) {
+                return div.innerHTML = `
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-grow text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                                `
+            }
+            else if (!isShowed) {
+                return div.innerHTML = "";
+            }
+        }
+
+        $('#boton').addClass('d-none')
+        Loader("loader", true);
+
+        $.ajax({
+            method: 'GET',
+            url: '@Url.Action("AssessmentShet","Assessment")',
+            success: (resp) => {
+
+                console.log(resp)
+
+                $('#boton').removeClass('d-none')
+                Loader("loader", false);
+
+                resp.map(items => {
+
+                    const Pregunta = $(`
+                                        <strong class="mb-4">${items.IdCriterio}. ${items.Descripcion}</strong>
+                                         <p> 
+                                            <div>
+                                                ${items.Evaluacion.map(ev => {
+                                                     return  `<div class="ml-3 form-check form-check-inline">
+                                                                <input class="form-check-input" type="radio" name="Pregunta${items.IdCriterio}" value="${ev.IdEstatus}" id="${items.IdCriterio}">
+                                                                <label class="form-check-label">
+                                                                    ${ev.Descripcion}
+                                                                </label>
+                                                            </div>`
+                                                })}
+                                            </div>
+                                       </p>`);                 
+                    $('#cuestionario').append(Pregunta);        
+                    
+                });
+
+                const suggestions = $(`<div class="form-group">
+                                            <strong>Please, indicate the suggestions to be transmitted to the author/s.</strong>
+                                            <textarea name="observaciones" id="comentarios" class="form-control"></textarea>
+                                      </div>`);
+                $('#suggestions').append(suggestions);
+
+                const According = $(`<div class="form-group">
+                                            <strong>According to the previous information, </strong>
+                                            <div class="form-check">
+                                              <input class="form-check-input" name="IdEstatus" type="radio" value="6">
+                                              <label class="form-check-label" for="flexCheckDefault">
+                                                Accept the manuscript without modifications to be presented in the XXI SIGEF Congress.
+                                              </label>
+                                            </div>
+                                            <div class="form-check ${sessionStorage.getItem('rol') ===  '1' ? 'd-none' : 'd-flex'}">
+                                              <input class="form-check-input" name="IdEstatus" type="radio" value="8">
+                                              <label class="form-check-label" for="flexCheckChecked">
+                                               Accept the manuscript to be presented in the XXI SIGEF Congress if the author(s) make(s) the changes mentioned above.
+                                              </label>
+                                            </div>
+                                            <div class="form-check">
+                                              <input class="form-check-input" name="IdEstatus" type="radio" value="7">
+                                              <label class="form-check-label" for="flexCheckChecked">
+                                                Reject the manuscript to be presented in the XXI SIGEF Congress. 
+                                              </label>
+                                            </div>
+                                      </div>`);
+                $('#Acording').append(According);
+            }
+        });
+
+
+        $('#Sheet').validate({
+            validClass: "is-valid",
+            errorClass: "is-invalid",
+            focusInvalid: false,
+            rules: {
+                Pregunta1: { required: true },
+                Pregunta2: { required: true },
+                Pregunta3: { required: true },
+                Pregunta4: { required: true },
+                Pregunta5: { required: true },
+                Pregunta6: { required: true },
+                Pregunta7: { required: true },
+                Pregunta8: { required: true },
+                Pregunta9: { required: true },
+                Pregunta10: { required: true },
+                observaciones: { required: true },
+                IdEstatus: { required: true }
+            },
+            messages: {
+                Pregunta1: { required: "" },
+                Pregunta2: { required: "" },
+                Pregunta3: { required: "" },
+                Pregunta4: { required: "" },
+                Pregunta5: { required: "" },
+                Pregunta6: { required: "" },
+                Pregunta7: { required: "" },
+                Pregunta8: { required: "" },
+                Pregunta9: { required: "" },
+                Pregunta10:{ required: "" },
+                observaciones: { required: "<small class='text-danger'>This field is required.</samll>" },
+                IdEstatus: { required: "" }
+            },
+            submitHandler: () => {
+
+                Loader("assesmentsLoader", true);
+
+                const Sheet = {
+                    IdPonencia: sessionStorage.getItem('IdPonencia'),
+                    IdUsuario: sessionStorage.getItem('idUsuario'),
+                    Observaciones: $('#comentarios').val(),
+                    IdEstatus: parseInt($('input:radio[name=IdEstatus]:checked').val()),
+                    Detalles: [
+                        { IdCriterio: 1, IdEstatusEvaluacion: parseInt($('input:radio[name=Pregunta1]:checked').val()) },
+                        { IdCriterio: 2, IdEstatusEvaluacion: parseInt($('input:radio[name=Pregunta2]:checked').val()) },
+                        { IdCriterio: 3, IdEstatusEvaluacion: parseInt($('input:radio[name=Pregunta3]:checked').val()) },
+                        { IdCriterio: 4, IdEstatusEvaluacion: parseInt($('input:radio[name=Pregunta4]:checked').val()) },
+                        { IdCriterio: 5, IdEstatusEvaluacion: parseInt($('input:radio[name=Pregunta5]:checked').val()) },
+                        { IdCriterio: 6, IdEstatusEvaluacion: parseInt($('input:radio[name=Pregunta6]:checked').val()) },
+                        { IdCriterio: 7, IdEstatusEvaluacion: parseInt($('input:radio[name=Pregunta7]:checked').val()) },
+                        { IdCriterio: 8, IdEstatusEvaluacion: parseInt($('input:radio[name=Pregunta8]:checked').val()) },
+                        { IdCriterio: 9, IdEstatusEvaluacion: parseInt($('input:radio[name=Pregunta9]:checked').val()) },
+                        { IdCriterio: 10, IdEstatusEvaluacion: parseInt($('input:radio[name=Pregunta10]:checked').val()) }
+                    ]
+                }
+                const url = '@Url.Action("CreateSheet","Assessment")';
+
+                $.ajax({
+                    method: 'POST',
+                    url: url,
+                    data: Sheet,
+                    success: (resp) => {
+                        if (resp) {
+                            Loader("assesmentsLoader", false);
+                            alertify.success("Assessment Created");
+                            $("#btnCrearSheet").attr("disabled", true);
+                        }
+                    }
+                })
+            }
+        });
+
+        
+
+    </script>
+}

@@ -1,0 +1,474 @@
+﻿
+@{
+    ViewBag.Title = "AddLectrue";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<h2 class="mb-5">Submit your Paper</h2>
+
+
+<!--Creacion de ponencia-->
+<form id="uploadForm" enctype="multipart/form-data">
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label style="color: #000; font-size: 18px;">Title Paper</label>
+            <input type="text" name="txtTema" class="form-control" id="theme" />
+        </div>
+        <div class="form-group col-md-6">
+            <label style="color: #000; font-size: 18px;">Main Topic</label>
+            <select class="form-control" name="txtLinea" id="ddlLinea">
+                <option value="0">--Choose an option--</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-12">
+            <label style="color: #000; font-size: 18px;">Abstract</label>
+            <textarea name="txtDescrip" id="descrip" class="form-control"></textarea>
+        </div>
+    </div>
+    <div class="form-row">
+        <p>If the manuscript is accepted for presentation at the XXI SIGEF Congress and you are interested in publishing the paper in one of the following options, please select one of them, otherwise skip the answer:</p>
+    </div>
+    <div class="form-row">
+        <div class="form-group form-check">
+            <input type="radio" value="0" name="ConsentCheck" class="form-check-input" id="ConsentCheck">
+            <label style="color: #000; font-size: 18px;" class="form-check-label" name="txtConsentimiento" for="exampleCheck1">
+                I agree that the paper will be sent for possible publication in the Springer Proceedings Book Series.
+            </label>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group form-check">
+            <input type="radio" value="1" name="ConsentCheck" class="form-check-input" id="ConsentCheck">
+            <label style="color: #000; font-size: 18px;" class="form-check-label" for="exampleCheck1">
+                I agree that the paper will be sent for possible publication in Fuzzy Economic Review
+            </label>
+        </div>
+    </div>
+
+    <hr class="shadow-lg" />
+    <br />
+
+    <h2 class="mb-5">Add Co-Authors</h2>
+   
+    <div class="form-row">
+        <small class="ml-2 mb-2">If you want to include one or more authors, it is necessary that each authors has previously registered in the system</small>
+        <div class="form-group col-md-6">
+            <label style="color: #000; font-size: 18px;">Collaborator</label>
+            <input type="text" name="txtCollaborator" id="Collaborator" class="form-control" placeholder="Search for a participant by full name or email" />
+        </div>
+        <div class="form-group col-md-2">
+            <button id="btnSearch" type="button" class="btn btn-danger" style="margin-top: 30px"><span class="fa fa-search"></span></button>
+        </div>
+    </div>
+
+    <div class="form-row mb-5">
+        <div class="form-group col-md-12">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th># User</th>
+                        <th>User Name</th>
+                        <th>User Email</th>
+                        <th>Tools</th>
+                    </tr>
+                </thead>
+                <tbody id="TableRequest"></tbody>
+            </table>
+        </div>
+
+        <div id="loadingChange"></div>
+
+    </div>
+    <div class="form-row shadow-sm animated fadeIn">
+        <div class="card col-md-12">
+            <div class="card-header">
+                <h3>Co-Authors added</h3>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <table class="table table-hover" id="tableJson">
+                        <thead class="d-none">
+                            <!--Datos que table.json ocupa-->
+                            <tr>
+                                <th>IdParticipante</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>TipoColaboracion</th>
+                                <th>Colaboracion</th>
+                                <th>Tools</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableColaborator"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row mt-3">
+        <input id="btnsubmit" type="submit" class="btn btn-primary" value="Complete Data Paper Submission " />
+    </div>
+
+    <div id="uploadLoader"></div>
+</form>
+
+<!--Carga de datos--->
+<form id="upload" class="mt-4 d-none animated fadeIn" enctype="multipart/form-data">
+    <h2 class="mb-5">Paper Upload</h2>
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label style="color: #000; font-size: 18px;">Title Page</label>
+            <input type="file" name="txtCover" id="cover" class="form-control-file" />  
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label style="color: #000; font-size: 18px;">Full Paper (Please not include the author(s) information)</label>
+            <input type="file" name="txtFile" id="file" class="form-control-file" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-12">
+            <button type="submit" id="btnUpLoad" class="btn btn-info"><span class="fa fa-upload mr-2"></span> Upload Files</button>
+        </div>
+    </div>
+    <div id="LoaderComplete"></div>
+</form>
+
+@section scripts{
+    <script>
+
+        //Catalogos
+
+        /*Liena*/
+        $.ajax({
+            url: '@Url.Action("DdlLiena", "Ddl")',
+            method: 'GET',
+            success: (res) => {
+
+                res.map(liena => {
+                    var opcion = $(`<option value=${liena.IdLinea}> ${liena.Siglas} - ${liena.Descripcion}</option>`)
+                    $('#ddlLinea').append(opcion);
+                });
+
+                console.log(res)
+            }
+         });
+
+        /*TipoExpositor*/
+        $.ajax({
+              url: '@Url.Action("DdlTipoColaborador", "Ddl")',
+            method: 'GET',
+            success: (res) => {
+
+                res.map(liena => {
+                    var opcion = $(`<option value='${liena.IdTipoExpositor}'>${liena.Descripcion}</option>`)
+                    $('#ddlExpositor').append(opcion);
+                });
+            }
+        })
+
+        /*TipoArchivo*/
+        $.ajax({
+              url: '@Url.Action("DdlTipoArchivo", "Ddl")',
+            method: 'GET',
+            success: (res) => {
+
+                console.log(res);
+
+                res.map(liena => {
+                    var opcion = $(`<option value='${liena.IdTipoExpositor}'>${liena.Descripcion}</option>`)
+                    $('#ddlTipoArchivo').append(opcion);
+                });
+            }
+         })
+
+        const Alert = (message, Target) => {
+
+            const div = document.getElementById(Target);
+
+            return div.innerHTML = `
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+               `
+        }
+        const Loader = (Target, isShowed) => {
+
+            const div = document.getElementById(Target);
+
+            if (isShowed) {
+                return div.innerHTML = `
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-grow text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                                `
+            }
+            else if (!isShowed) {
+                return div.innerHTML = "";
+            }
+        }
+
+        //Establecer datos del corresponding author
+        var corresponding = $(`<tr id="row">
+                                    <td>${sessionStorage.getItem('idUsuario')}</td>
+                                    <td>${ sessionStorage.getItem('name') }</td>
+                                    <td>${ sessionStorage.getItem('email') }</td>
+                                    <td>Corresponding Author</td>
+                                    <td>
+                                            <button disabled type="button" class="btn btn-danger"><span class="fa fa-trash"></span></button>
+                                    </td>
+                                </tr>`);
+        $('#tableColaborator').append(corresponding);
+
+        $('#btnSearch').on('click', (e) => {
+            e.preventDefault();
+
+            Loader("loadingChange", true);
+
+             $.ajax({
+                   method: 'POST',
+                   url: '@Url.Action("SearchCollaborator","Lectures")',
+                   data: {
+                     SearchValue: $('#Collaborator').val()
+                   },
+                   success: (resp) => {
+
+                        if (resp === "") {
+
+                            Loader("loadingChange", false);
+                            Alert("No participents able", "loadingChange");
+
+                        } else {
+
+                            resp.map(row => {
+                                const rows = $(`<tr id="rowResponse">
+                                                   <td>${row.IdUsuario}</td>
+                                                   <td>${row.Nombre} ${row.Apellidos}</td>
+                                                   <td>${row.Email}</td>
+                                                   <td>
+                                                        <button id="Add" type="button" class="btn btn-primary">Add</button>
+                                                   </td>
+                                              </tr>`);
+
+                                $('#TableRequest').html(rows);
+                                Loader("loadingChange", false);
+
+                            });
+
+                            //Agregar Participantes (al arreglo)
+                            $('#Add').on('click', () => {
+
+                                //Crea la fila
+                                var nuevaFila = $(`<tr id="row">
+                                                        <td>${$('#rowResponse td')[0].innerHTML}</td>
+                                                        <td>${$('#rowResponse td')[1].innerHTML}</td>
+                                                        <td>${$('#rowResponse td')[2].innerHTML}</td>
+                                                        <td>Co-Author</td>
+                                                        <td>
+                                                                <button onclick="$(this).closest('tr').remove();" type="button" class="btn btn-danger"><span class="fa fa-trash"></span></button>
+                                                        </td>
+                                                  </tr>`);
+
+                                if ($("#Colaboracion").val() == "" ) {
+
+                                    alertify.error("Please fill colaborations");
+
+                                } 
+                                else {
+
+                                    $('#tableColaborator').append(nuevaFila); //Tbody de tablejson
+                                }
+                            })
+                        }
+                    }
+                 })
+
+        });
+
+        //Validacion de ponencia
+        $('#uploadForm').validate({
+            errorClass: "is-invalid",
+            validClass: "is-valid",
+            rules: {
+                txtTema: { required: true },
+                txtDescrip: { required: true },
+                txtLinea: { required: true, min: 1, max: 4 }
+            },
+            messages: {
+                txtLinea: { min: "you must choose an option" }
+            },
+            submitHandler: () => {
+
+                const Model = {
+                    IdLinea: $('#ddlLinea').val(),
+                    IdUsuario: sessionStorage.getItem('idUsuario'),
+                    Tema: $('#theme').val(),
+                    Descripcion: $('#descrip').val(),
+                    Concentimiento: parseInt($('input:radio[name=ConsentCheck]:checked').val()),
+                    Colaboradores: $('#tableJson').tableToJSON({
+                        ignoreColumns: [1, 2, 5]
+                    })
+                }
+
+                if (isNaN(Model.Concentimiento)) {
+                    Model.Concentimiento = null
+                }
+
+                //Cuenta los autores que existan en el array
+                for (var i = 1; i < Model.Colaboradores.length; i++) {
+
+                    if (Model.Colaboradores[i].TipoColaboracion == "Author") {
+                        Autores = i + 1;
+                    }
+                }
+
+                //Array de ids
+                var IdParticiapnte = Model.Colaboradores.map(items => {
+                    return items.IdParticipante;
+                });
+
+                function find_duplicate_in_array(arra1) {
+                    var object = {};
+                    var result = [];
+
+                    arra1.forEach(function (item) {
+                        if (!object[item])
+                            object[item] = 0;
+                        object[item] += 1;
+                    })
+
+                    for (var prop in object) {
+                        if (object[prop] >= 2) {
+                            result.push(prop);
+                        }
+                    }
+
+                    return result;
+
+                }
+
+                var usuariosRepdos = find_duplicate_in_array(IdParticiapnte);
+
+
+                if (Model.Colaboradores.length > 4)
+                {
+                    alertify.error('Only 3 participants for paper');
+
+                } else if (usuariosRepdos > 0) {
+
+                    alertify.error('There can not be duplicated participants');
+                }
+                else
+                {
+                    
+                     $.ajax({
+                        url: '@Url.Action("AddLectrue", "Lectures")',
+                        method: 'POST',
+                        data: Model,
+                        success: (res) => {
+
+                            console.log(res); 
+
+                            Loader("LoaderComplete", false); //Limpia el html del loader
+
+                            $('#btnsubmit').removeAttr('disabled');//habilita el crear
+                            alertify.success('Data Paper Complete');
+
+                            var inputs = $('#uploadForm :input');
+                            inputs.removeClass('is-valid');
+                            inputs.attr("disabled", true);
+
+
+                            Loader("uploadLoader", true);
+
+                            setTimeout(() => {
+                                Loader("uploadLoader", false);
+                                $("#upload").removeClass('d-none');
+                            }, 2000)
+                        }
+                    });
+                }
+            }
+        });
+
+        $("#upload").on('submit', (e) => {
+
+            e.preventDefault();
+
+            var data = new FormData();
+
+            var Cover = $("#cover")[0].files[0];
+            var Lecture = $("#file")[0].files[0];
+            var Linea = $("#ddlLinea").val();
+
+            data.append('Cover', Cover);
+            data.append('Lecture', Lecture);
+            data.append('idUsuario', sessionStorage.getItem('idUsuario'));
+            data.append('idLinea', Linea);
+
+            if (Cover == null) {
+                alertify.error("Title Paper is not provider");
+            }
+            if (Lecture == null) {
+                alertify.error("Full Paper is not provider");
+            }
+            else {
+
+                $.ajax({
+                    url: '@Url.Action("UploadFiles", "Lectures")',
+                    type: 'POST',
+                    data: data,
+                    contentType: false,
+                    processData: false,
+                    success: (resp) => {
+
+                       
+                        //Establecer datos del corresponding author
+                        var corresponding = $(`<tr id="row">
+                                    <td>${sessionStorage.getItem('idUsuario')}</td>
+                                    <td>${ sessionStorage.getItem('name')}</td>
+                                    <td>${ sessionStorage.getItem('email')}</td>
+                                    <td>Corresponding Author</td>
+                                    <td>
+                                            <button disabled type="button" class="btn btn-danger"><span class="fa fa-trash"></span></button>
+                                    </td>
+                                </tr>`);
+                        $('#tableJson #tableColaborator').html(corresponding);
+
+
+                        if (resp) {
+                            $('#uploadForm')[0].reset();
+                            $('#upload')[0].reset();
+
+                            $('#TableRequest').html("");
+
+                            $('#fileRow').html("");
+
+                            var inputs = $('#uploadForm :input');
+                            inputs.removeClass('is-valid');
+                            inputs.attr("disabled", false);
+
+                            $("#upload").addClass('d-none');
+
+                            alertify.success("Files Uploaded satisfactorily");
+                        }
+                        else {
+                            alertify.error("Only Word files");
+                        }
+                    }
+                });
+            }
+        });
+
+    </script>
+}

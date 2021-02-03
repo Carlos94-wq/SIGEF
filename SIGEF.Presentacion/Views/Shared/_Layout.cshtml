@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Mi aplicación ASP.NET</title>
+    <link href="~/css/font-awesome.min.css" rel="stylesheet" />
+    @Styles.Render("~/Content/css")
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
+    <link href="~/Scripts/css/alertify.css" rel="stylesheet" />
+    <link href="~/Scripts/css/themes/default.css" rel="stylesheet" />
+    @Styles.Render("~/LayOutHome/css")
+    @Scripts.Render("~/bundles/modernizr")
+    <link href="~/css/font-awesome.min.css" rel="stylesheet" />
+</head>
+<body style="transition: all 300ms">
+    <!-- INICIO BARRA DE NAVEGACION SUPERIOR -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="@Url.Action("ParticipantsPagedList", "Main")">
+            <h3>SIGEF</h3>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <div class="form-inline my-2 my-lg-0">
+                <div class="mt-3 mr-2">
+                    <p id="user"></p>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+    <!-- FIN BARRA DE NAVEGACION SUPERIOR -->
+    <!-- INICIO BARRA IZQUIERDA CON EMPRESAS -->
+    <div id="sidemenu" class="menu-collapsed bg-danger">
+        <div id="header">
+            <div id="title"><span>Welcome to SIGEF</span></div>
+            <div id="menu-btn">
+                <div class="btn-hamburger"></div>
+                <div class="btn-hamburger"></div>
+                <div class="btn-hamburger"></div>
+            </div>
+        </div>
+        <div id="menu-items">
+            <div class="item separator"></div>
+            <div class="item">
+                <a href="#" id="logout">
+                    <div class="icon">
+                        <span class="fa fa-lock"></span>
+                    </div>
+                    <div class="title"><span>LogOut</span></div>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <div style="transition: all 300ms" class="animated fadeIn container mt-4 shadow-sm p-3 mb-5 bg-white rounded" id="root">
+        @RenderBody()
+    </div>
+
+
+    @Scripts.Render("~/bundles/jquery")
+    <script src="~/Scripts/alertify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/table-to-json@1.0.0/lib/jquery.tabletojson.min.js" integrity="sha256-H8xrCe0tZFi/C2CgxkmiGksqVaxhW0PFcUKZJZo1yNU=" crossorigin="anonymous"></script>
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+    <script>
+
+        const btn = document.querySelector('#menu-btn');
+        const menu = document.querySelector('#sidemenu');
+        btn.addEventListener('click', e => {
+            menu.classList.toggle("menu-expanded");
+            menu.classList.toggle("menu-collapsed");
+
+            document.querySelector('body').classList.toggle('body-expanded');
+        });
+
+        const IdUsuario = sessionStorage.getItem('idUsuario');
+        const LogUser = sessionStorage.getItem('name');
+        const Rol = sessionStorage.getItem('rol');
+
+        $('#user').html(LogUser);
+
+        if (IdUsuario === null) {
+            window.location.href = "@Url.Action("Index","NotFound")"
+        }
+
+        $('#logout').on('click', (e) => {
+            e.preventDefault();
+
+            sessionStorage.removeItem('idUsuario');
+            sessionStorage.removeItem('name');
+            sessionStorage.removeItem('rol');
+
+            window.location.href = '@Url.Action("Login","Auth")';
+        })
+
+
+        if (Rol == 4) {
+            $.ajax({
+                method: 'GET',
+                url: '@Url.Action("ParticipantMenu", "Menu")?rol=' +4,
+                success: (resp) => {
+                    resp.map(items => {
+                        const MenuItem = $(`<div class="item">
+                                            <a href="${items.Ruta}">
+                                                <div class="icon">
+                                                    <span class="${ items.Icono }"></span>
+                                                </div>
+                                                <div class="title"><span>${ items.Titulo }</span></div>
+                                            </a>
+                                        </div>`);
+                        $('#menu-items').append(MenuItem);
+                    });
+                }
+            });
+        }
+
+        if (Rol == 3 || Rol == 1) {
+                $.ajax({
+                    method: 'GET',
+                    url: '@Url.Action("ComiteUser", "Menu")?rol=' +3,
+                    success: (resp) => {
+                        resp.map(items => {
+                            const MenuItem = $(`<div class="item">
+                                                <a href="${items.Ruta}">
+                                                    <div class="icon">
+                                                        <span class="${ items.Icono }"></span>
+                                                    </div>
+                                                    <div class="title"><span>${ items.Titulo }</span></div>
+                                                </a>
+                                            </div>`);
+                            $('#menu-items').append(MenuItem);
+                        });
+                    }
+                });
+         }
+
+    </script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,20 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial;
+    margin-left: 50px;
+}
+
+footer {
+    clear: both;
+    text-align: center;
+    margin-top: 20px;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 20px;
+    color: #000;
+    background: #dee2e6;
+}

@@ -1,0 +1,411 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2 class="mb-5">Paper Review</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Main Topic</th>
+            <th>Title Paper</th>
+            <th>Abstract</th>
+            <th>Status</th>
+            <th>Tools</th>
+        </tr>
+    </thead>
+    <tbody id="MainRowFile"></tbody>
+</table>
+
+<div class="mt-5" id="loaderTarget"></div>
+
+@Html.Partial("_ParticipantsFilesModal")
+
+@section scripts{
+
+    <script>
+
+        const Loader = (Target, isShowed) => {
+
+            const div = document.getElementById(Target);
+
+            if (isShowed) {
+                return div.innerHTML = `
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-grow text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                                `
+            }
+            else if (!isShowed) {
+                return div.innerHTML = "";
+            }
+        }
+
+        Loader("loaderTarget", true);
+
+        //Peticion General (Trae todos las ponencias del usuario)
+        $.ajax({
+            url: '@Url.Action("PagedLecturesList", "Main")?idParticipante=' + sessionStorage.getItem('idUsuario'),
+            method: 'GET',
+            success: (resp) => {
+
+                $('#CreateSheet').addClass('d-none');
+                Loader("loaderTarget", false);
+
+                resp.map(ponencias => {
+
+                    //Clasificar estatus
+                    var estatus = "";
+                    var Linea = "";
+
+                    switch (ponencias.IdEstatus) {
+                        case 4:
+                            estatus = "Submitted";
+                            break;
+                        case 5:
+                            estatus = "In Review";
+                            break;
+                        case 6:
+                            estatus = "Approved";
+                            break;
+                        case 7:
+                            estatus = "Rejected";
+                            break;
+                        case 8:
+                            estatus = "Second Review"
+                            break;
+                        case 9:
+                            estatus = "Incomplete Submission"
+                            break;
+                        default:
+                    }
+                    switch (ponencias.IdLinea) {
+                        case 1:
+                            Linea = "Finance and Economy";
+                            break;
+                        case 2:
+                            Linea = "Methodological Issues";
+                            break;
+                        case 3:
+                            Linea = "Management and Accounting";
+                            break;
+                        case 4:
+                            Linea = "Technology";
+                            break;
+                        default:
+                    }
+
+                    var FileRow = $(`<tr>
+                                        <td>${ Linea}</td>
+                                        <td>${ ponencias.Tema}</td>
+                                        <td style="overflow: hidden;">${ ponencias.Descripcion}</td>
+                                        <td>${ estatus}</td>
+                                        <td><button class="btn btn-primary" data-toggle="modal" id="${ponencias.IdPonencia}" data-target="#staticBackdrop"><span class="fa fa-edit"></span></button></td>
+                                </tr>`);
+
+                    $("#MainRowFile").append(FileRow);
+
+                    //Obtencion de una ponencia por id
+                    $(`#${ponencias.IdPonencia}`).on('click', (i) => {
+                        $.ajax({
+                            url: '@Url.Action("LectureDetail", "Main")?id=' + ponencias.IdPonencia,
+                            method: 'GET',
+                            success: (resp) => {
+                                console.log(resp);
+
+                                $("#txtComentarios").val(resp.Ponencia.Observaciones);
+
+                                var alertClass = "";
+                                const handleAlertComponent = (style) => {
+                                    return $(`<div id="alertEstatus" class="alert ${style} col-md-6" role="alert">
+                                                <p id="Paragrah"></p >
+                                            </div >`);
+                                }
+                                switch (resp.Ponencia.Estatus) {
+
+                                    case "Submitted":
+
+                                        $("#btnUpdateFiles").attr('disabled', true);
+                                        $("#Cover").attr('disabled', true);
+                                        $("#Lecture").attr('disabled', true);
+
+                                        alertClass = "alert-warning";
+                                        $("#alertEstatus").html(handleAlertComponent(alertClass));
+
+                                        break;
+
+                                    case "In Review":
+
+                                        $("#btnUpdateFiles").attr('disabled', true);
+                                        $("#Cover").attr('disabled', true);
+                                        $("#Lecture").attr('disabled', true);
+
+                                        alertClass = "alert-primary";
+                                        $("#alertEstatus").html(handleAlertComponent(alertClass));
+
+                                        break;
+
+                                    case "Approved":
+
+                                        $("#btnUpdateFiles").attr('disabled', true);
+                                        $("#Cover").attr('disabled', true);
+                                        $("#Lecture").attr('disabled', true);
+                                        alertClass = "alert-success";
+                                        $("#alertEstatus").html(handleAlertComponent(alertClass));
+                                        break;
+
+                                    case "Rejected":
+
+                                        $("#btnUpdateFiles").attr('disabled', true);
+                                        $("#Cover").attr('disabled', true);
+                                        $("#Lecture").attr('disabled', true);
+
+                                        alertClass = "alert-danger";
+                                        $("#alertEstatus").html(handleAlertComponent(alertClass));
+
+                                        break;
+
+                                    case "Second Review":
+
+                                        $("#btnUpdateFiles").removeAttr('disabled');
+                                        $("#Cover").attr('disabled', true);
+                                        $("#Lecture").removeAttr('disabled');
+
+                                        alertClass = "alert-info";
+                                        $("#alertEstatus").html(handleAlertComponent(alertClass));
+
+                                        break;
+
+                                    case "Incomplete Submission":
+
+                                        $("#btnUpdateFiles").removeAttr('disabled');
+                                        $("#Cover").removeAttr('disabled');
+                                        $("#Lecture").removeAttr('disabled');
+
+					                    alertClass = "alert-danger";
+                                        $("#alertEstatus").html(handleAlertComponent(alertClass));
+
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+
+                                var estatus = $(`<p class='card-title'>Status: ${resp.Ponencia.Estatus}</p>`);
+                                $("#Paragrah").html(estatus);
+
+                                $("#description").val(resp.Ponencia.Descripcion);
+                                $("#idponencia").val(resp.Ponencia.IdPonencia);
+                                $("#line").val(resp.Ponencia.Linea);
+			                    $("#titlePaper").val(resp.Ponencia.Tema);
+
+                                $("#row").html("");
+
+                                //Tabla de participantes
+                                resp.Colaboradores.map(items => {
+                                    var collaborators = $(`
+                                                                <tr>
+                                                                    <td>${items.Nombre}</td>
+                                                                    <td>${items.TipoColaboracion}</td>
+                                                                </tr>
+                                                                `);
+
+                                    $("#row").append(collaborators);
+                                });
+
+                                ////Formulario de input file
+                                //var inputFile = $(``)
+
+                                //esconde los controles segun los archivos cargados si ya tiene 4 archivos ya no pude subir mas
+                                if (resp.Archivos.length == 4) {
+                                    $("#formInputFile").addClass("d-none");
+                                }
+                                else
+                                {
+                                    $("#formInputFile").removeClass("d-none");
+                                }
+
+                                $("#rowFiles").html("");
+
+                                //Tabla de Archivos
+                                resp.Archivos.map(items => {
+
+                                    var Archivos = $(`
+                                                                <tr>
+                                                                    <td>${items.TipoArchivo}</td>
+                                                                    <td>${items.Archivo}</td>
+                                                                    <td>${items.FechaRegistro}</td>
+                                                                </tr>
+                                                                `);
+
+                                    $("#rowFiles").append(Archivos);
+                                });
+                            }
+                        })
+                    })
+
+                });
+            }
+        });
+
+          //Esto viene de la ventana modal
+        $("#btnUpdateFiles").on('click', (e) => {
+
+            e.preventDefault();
+
+            //Archivos caragados
+            const Archivos = $("#rowFiles tr");
+            
+            //Versionamiento
+            var Version = 0;
+
+            if (Archivos.length == 0) {
+                Version = 1
+            } else {
+                Version = 2
+            }
+            console.log(Version);
+
+            var data = new FormData();
+
+            var idPoenecia = $("#idponencia").val();
+            var Cover = $("#Cover")[0].files[0];
+            var Lecture = $("#Lecture")[0].files[0];
+            var linea = $("#line").val();
+            var idUsuario = sessionStorage.getItem('idUsuario');
+
+
+            data.append('Cover', Cover);
+            data.append('Lecture', Lecture);
+            data.append('idUsuario', idUsuario);
+            data.append('version', Version);
+            data.append('idLinea', linea);
+            data.append('idPonencia', idPoenecia);
+
+            if (document.getElementById('Cover').getAttribute('disabled') == "disabled") {
+
+                if (Lecture == null) {
+                    alertify.error('Please choose a full paper')
+            } else
+                {
+                    Loader("uploadTarget", true);
+
+                    $.ajax({
+                    url: '@Url.Action("UpdateFiles", "Lectures")',
+                    method: 'POST',
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    success: (resp) => {
+
+                        Loader("uploadTarget", false);
+
+                        if (resp) {
+
+                            $("#btnUpdateFiles").attr('disabled', true);
+
+                            alertify.success('Files uploaded');
+
+                            //Actualizar detalle
+                            $.ajax({
+                                method: 'GET',
+                                url: '@Url.Action("LectureDetail", "Main")?id=' + $("#idponencia").val(), //Es un input que esta escondido,
+                                success: (resp) => {
+
+                                    Loader("uploadTarget", false);
+
+                                    //Borra todo lo anterior
+                                    $("#rowFiles").html("");
+
+                                    //Append de los archivos acualizados
+                                    resp.Archivos.map(archivos => {
+
+                                        var Filas = $(`<tr>
+                                                                   <td>${archivos.TipoArchivo}</td>
+                                                                   <td>${archivos.Archivo}</td>
+                                                                   <td>${archivos.FechaRegistro}</td>
+                                                              <tr>`)
+                                        $("#rowFiles").append(Filas);
+                                    })
+
+                                    $("#Cover").attr('disabled', true);
+                                    $("#Lecture").attr('disabled', true);
+
+                                }
+                            })
+
+                        } else {
+
+                            alertify.error('Only Word files');
+
+                        }
+                    }
+                     })
+                  }
+
+            } else {
+                if (Cover == null) {
+                alertify.error('Please choose a title paper')
+            } else if (Lecture == null) {
+               alertify.error('Please choose a full paper')
+            } else
+            {
+                    $.ajax({
+                    url: '@Url.Action("UpdateFiles", "Lectures")',
+                    method: 'POST',
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    success: (resp) => {
+
+                        Loader("uploadTarget", false);
+
+                        if (resp) {
+
+                            $("#btnUpdateFiles").attr('disabled', true);
+
+                            alertify.success('Files uploaded');
+
+                            //Actualizar detalle
+                            $.ajax({
+                                method: 'GET',
+                                url: '@Url.Action("LectureDetail", "Main")?id=' + $("#idponencia").val(), //Es un input que esta escondido,
+                                success: (resp) => {
+                                    console.log(resp.Archivos);
+
+                                    //Borra todo lo anterior
+                                    $("#rowFiles").html("");
+
+                                    //Append de los archivos acualizados
+                                    resp.Archivos.map(archivos => {
+
+                                        var Filas = $(`<tr>
+                                                                   <td>${archivos.TipoArchivo}</td>
+                                                                   <td>${archivos.Archivo}</td>
+                                                                   <td>${archivos.FechaRegistro}</td>
+                                                              <tr>`)
+                                        $("#rowFiles").append(Filas);
+                                    })
+
+                                    $("#Cover").attr('disabled', true);
+                                    $("#Lecture").attr('disabled', true);
+
+                                }
+                            })
+
+                        } else {
+
+                            alertify.error('Only Word files');
+
+                        }
+                    }
+                     })
+                  }
+            }
+        });
+
+    </script>
+
+} 

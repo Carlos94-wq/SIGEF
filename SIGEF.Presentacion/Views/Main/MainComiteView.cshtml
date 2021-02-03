@@ -1,0 +1,72 @@
+﻿
+@{
+    ViewBag.Title = "MainComiteView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<table class="table table-bordere" id="tbl_Lecture">
+    <thead>
+        <tr>
+            <th>Paper</th>
+            <th>Description</th>
+            <th>Post Date</th>
+            <th>Main Topic</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+@section scripts{
+
+    <script>
+
+        var all = $("#tbl_Lecture").DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: `@Url.Action("PagedList","Main")?id=${sessionStorage.getItem('idUsuario')}`,
+                type: 'POST',
+                dataType: 'json'
+            },
+            pageLength: 10,
+            responsive: 1,
+            columns: [
+                { data: "Tema" },
+                { data: "Descripcion" },
+                { data: "FechaRegistro" },
+                { data: "Linea" }
+            ]
+        })
+
+        $('#tbl_Lecture tbody').on('click', 'tr', function () {
+            var result = all.row(this).data();
+
+            $.confirm({
+                title: 'Ok!',
+                content: 'Do you want to review this file?',
+                buttons: {
+                    confirm: function () {
+                        $.ajax({
+                            url: '@Url.Action("GetLecture", "Main")',
+                            method: 'POST',
+                            data: {
+                                'IdEvaluador': sessionStorage.getItem('idUsuario'),
+                                'IdPonencia': result.IdPonencia
+                            },
+                            success: (resp) => {
+                                if (resp) {
+                                     window.location.href = '@Url.Action("InReviewComite", "Main")'
+                                }
+                            }
+
+                        })
+
+                    },
+                    cancel: function () {
+                        $.alert('Canceled!');
+                    }
+                }
+            });
+        });
+    </script>
+}

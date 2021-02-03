@@ -1,0 +1,100 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Auntenticacion</title>
+    @Styles.Render("~/Content/css")
+    <link href="~/Scripts/css/alertify.css" rel="stylesheet" />
+    <link href="~/Scripts/css/themes/default.css" rel="stylesheet" /> 
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body style="transition: all 300ms">
+
+    <div class="sidenav" style="background: #d52726">
+        <div class="login-main-text">
+            <a href="http://apps.facpya.uanl.mx/Sigef/" class="h2 text-white">SIGEF.</a>
+            <p>International Association for Fuzzy</p>
+        </div>
+    </div>
+    <div class="main" style="margin-top: 250px">
+        <div class="col-md-12">
+            @RenderBody()
+        </div>
+        <div style="display: flex; align-items: center; justify-content: center; cursor: pointer">
+            <a id="Descargar" class="ml-5" href="@Url.Action("DownLoadManul", "Main")?fileName=Manual.pdf">User Manual</a>
+            <a class="nav-link" data-toggle="modal" data-target="#staticBackdrop">I forgot my password </a>
+        </div>
+    </div>
+
+    <div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Restore Password</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label>Email</label>
+                            <input required id="txtRestoreEmail" type="email" class="form-control"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnRestore" type="button" class="btn btn-secondary" data-dismiss="modal">Restore</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    <script src="~/Scripts/alertify.min.js"></script>
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+    <script>
+
+        const id = sessionStorage.getItem('idUsuario');
+        const Rol = sessionStorage.getItem('rol');
+
+        if (id != null) {
+            if (Rol == 4) {
+                 window.location.href = '@Url.Action("ParticipantsPagedList", "Main")';
+            }
+        }
+
+        $('#btnRestore').on('click', (e) => {
+            e.preventDefault();
+
+            $.ajax({
+                url: '@Url.Action("RestorePassword", "Auth")',
+                method: 'POST',
+                data: {
+                    email: $('#txtRestoreEmail').val()
+                },
+                success: (resp) => {
+
+                    console.log(resp)
+
+                    if (resp) {
+                        alert("Youre new password has been send it to the email")
+                    }
+                    else {
+                        alert("It seems that this email do not exist")
+                    }
+                }
+            })
+
+        });
+
+    </script>
+</body>
+</html>

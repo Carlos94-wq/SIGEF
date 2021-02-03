@@ -1,0 +1,12 @@
+C:\Users\carlos\Desktop\Trabajo\SIGEF\SIGEF.Dta\bin\Debug\SIGEF.Dta.dll
+C:\Users\carlos\Desktop\Trabajo\SIGEF\SIGEF.Dta\bin\Debug\SIGEF.Dta.pdb
+C:\Users\carlos\Desktop\Trabajo\SIGEF\SIGEF.Dta\obj\Debug\SIGEF.Dta.csprojAssemblyReference.cache
+C:\Users\carlos\Desktop\Trabajo\SIGEF\SIGEF.Dta\obj\Debug\SIGEF.Dta.csproj.CoreCompileInputs.cache
+C:\Users\carlos\Desktop\Trabajo\SIGEF\SIGEF.Dta\obj\Debug\SIGEF.Dta.dll
+C:\Users\carlos\Desktop\Trabajo\SIGEF\SIGEF.Dta\obj\Debug\SIGEF.Dta.pdb
+C:\Users\Charly\Documents\Trabajo\SIGEF\SIGEF.Dta\bin\Debug\SIGEF.Dta.dll
+C:\Users\Charly\Documents\Trabajo\SIGEF\SIGEF.Dta\bin\Debug\SIGEF.Dta.pdb
+C:\Users\Charly\Documents\Trabajo\SIGEF\SIGEF.Dta\obj\Debug\SIGEF.Dta.csprojAssemblyReference.cache
+C:\Users\Charly\Documents\Trabajo\SIGEF\SIGEF.Dta\obj\Debug\SIGEF.Dta.csproj.CoreCompileInputs.cache
+C:\Users\Charly\Documents\Trabajo\SIGEF\SIGEF.Dta\obj\Debug\SIGEF.Dta.dll
+C:\Users\Charly\Documents\Trabajo\SIGEF\SIGEF.Dta\obj\Debug\SIGEF.Dta.pdb

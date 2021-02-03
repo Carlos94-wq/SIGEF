@@ -1,0 +1,234 @@
+﻿
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+
+<div class="col-md-8 login-form">
+    @using (Html.BeginForm("", "", FormMethod.Post, new { id = "login" }))
+    {
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                <label>Email:</label>
+                <input type="text" id="Email" name="txtUsuario" class="form-control" />
+            </div>
+        </div>
+        <div class="form-row" id="divContra">
+            <div class="form-group col-md-12">
+                <label>Password:</label>
+                <input type="password" id="Password" class="form-control" name="txtPassword" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fa fa-sign-in" aria-hidden="true"></i>
+                    Login
+                </button>
+            </div>
+            <div class="form-group col-md-8">
+                <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#exampleModal">
+                    Don´t you have an account?
+                </button>
+            </div>
+        </div>
+        <div class="form-row">
+            <div id="loginLoader"></div>
+        </div>
+    }
+</div>
+@Html.Partial("CreatAccount")
+
+
+@section scripts{
+    <script>
+
+
+        const Alert = (message, Target) => {
+
+            const div = document.getElementById(Target);
+
+            return div.innerHTML = `
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+               `
+        }
+
+        const Loader = (Target) => {
+
+            const div = document.getElementById(Target);
+
+            return div.innerHTML = `
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-grow text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+                                `
+                }
+
+        //Validaciones de login
+        $('#login').validate({
+            validClass: "is-valid",
+            errorClass: "is-invalid",
+            focusInvalid: false,
+            rules: {
+                txtUsuario: { required: true, email: true },
+                txtPassword: { required: true }
+            },
+            messages: {
+                txtUsuario: {
+                    required: "<small class='text-danger'>User field must be filled</small>",
+                    email: "<small class='text-danger'>The value entered is not a valid email</small>"
+                },
+                txtPassword: {
+                    required: "<small class='text-danger'>Password field must be filled</small>"
+                }
+            },
+            submitHandler: () => {
+
+                const usuario = {
+                    Email: $('#Email').val(),
+                    Contrasenia: $('#Password').val()
+                }
+                handleLogin(usuario);
+            }
+        });
+
+        //Peticion de login
+        const handleLogin = (usuario) => {
+            $.ajax({
+                url: "@Url.Action("Login")",
+                method: 'POST',
+                data: usuario,
+                success: (resp) => {
+
+                    console.log(resp);
+
+                    if (resp.NoFound == "No user Found") {
+                        alertify.error(resp.NoFound);
+                    }
+                    else
+                    {
+                        if (resp.status == 2) {
+
+                            sessionStorage.setItem('email', $('#Email').val());
+                            sessionStorage.setItem('contra', $('#Password').val())
+                            window.location.href = resp.url;
+
+                        }
+                        else
+                        {
+                           if( resp.rol == 4 ){
+		                       sessionStorage.setItem('name', resp.name + " " + resp.apellidos);
+                               sessionStorage.setItem('rol', resp.rol);
+                               sessionStorage.setItem('email', resp.email);
+                               sessionStorage.setItem('idUsuario', resp.idUsuario)
+                               window.location.href = resp.url;
+                            }
+
+                            if (resp.rol == 3 || resp.rol == 1) {
+                                sessionStorage.setItem('name', resp.name + " " + resp.apellidos);
+                                sessionStorage.setItem('rol', resp.rol);
+                                sessionStorage.setItem('email', resp.email);
+                                sessionStorage.setItem('idUsuario', resp.idUsuario)
+                                window.location.href = resp.url;
+                            }
+                        }
+
+
+                    }
+                }
+            })
+        }
+
+        //Validaciones para crear usuarios
+        $('#AccountForm').validate({
+            validClass: 'is-valid',
+            errorClass: 'is-invalid',
+            focusInvalid: false,
+            rules: {
+                txtNombreCrear: { required: true },
+                txtApellidosCrear: { required: true },
+                txtEmailCrear: { required: true, email: true },
+                txtContraCrear: { required: true, minlength: 10 },
+                txtConfirmarContraCrear: { required: true, equalTo: "#CrearContra", minlength: 10 },
+                txtInstitucion: { required: true },
+                txtPais: { required: true },
+                txtCiudad: { required: true }
+            },
+            messages: {
+                txtNombreCrear: { required: "<samll class='text-danger'>Name file must be fill</small>" },
+                txtApellidosCrear: { required: "<samll class='text-danger'>Last Name file must be fill</small>" },
+                txtContraCrear: {
+                    required: "<samll class='text-danger'>Password file must be fill</small>"
+                }
+            },
+            submitHandler: () => {
+
+                Loader("CreateSreenAlert"); //Componente
+
+                const Model = {
+                    Nombre:      $('#nombre').val(),
+                    Apellidos:   $('#Apellidos').val(),
+                    Email:       $('#email').val(),
+                    Contrasenia: $('#CrearContra').val(),
+                    Institucion: $('#institiucion').val(),
+                    Pais:        $('#Pais').val(),
+                    Cuidad: $('#Ciudad').val(),
+                    Prefijo: $('#ddlPrefijo').val()
+                };//Modelo de datos
+
+                handleCreate(Model); //Peticion
+            }
+        })
+
+        //Peticion de login
+        const handleCreate = (usuario) => {
+            $.ajax({
+                url: "@Url.Action("CreatAccount")",
+                method: 'POST',
+                data: usuario,
+                success: (resp) => {
+
+                    console.log(resp);
+
+                    if (resp.data) { //Entra a qui unicamente si el correo es valido para crear
+
+                        /* Bloquear campos a qui */
+                        const inputs = [
+                            $('#nombre'),
+                            $('#Apellidos'),
+                            $('#email'),
+                            $('#CrearContra'),
+                            $('#ConfirmarContra')
+                        ] //Mete todos los inputs en un arreglo
+                        inputs.map(inputs => {
+                            inputs.attr('readonly', true) // agrega el atributo readonly a todos los intpus
+                        }); //El map recorre el arreglo
+                        $('#btnCrear').attr('disabled', true);
+
+                        const message = `An account with the email ${$('#email').val()} has been created </br> </br>
+                                         Go to  <a href="@Url.Action("CompleteAccount")">Complete your account</a> to finish it`
+                        Alert(message, "CreateSreenAlert");
+
+                        sessionStorage.setItem('email', $('#email').val());
+                        sessionStorage.setItem('contra', $('#ConfirmarContra').val() )
+                    }
+                    else {
+
+                        const message = "This email is already registered, <br/> To recover it, return to the Login window an click on 'I Forgot muy password'";
+                        Alert(message, "CreateSreenAlert");
+                    }
+
+                }
+            })
+        }
+
+    </script>
+}
+

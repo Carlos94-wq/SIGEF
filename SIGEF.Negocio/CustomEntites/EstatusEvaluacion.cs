@@ -1,0 +1,14 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SIGEF.Negocio.CustomEntites
+{
+    public class EstatusEvaluacion
+    {
+        public int IdEstatus { get; set; }
+        public string Descripcion { get; set; }
+    }
+}

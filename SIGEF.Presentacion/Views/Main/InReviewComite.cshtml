@@ -1,0 +1,213 @@
+﻿
+@{
+    ViewBag.Title = "InReviewComite";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>In Review</h2>
+<table class="table table-hover table-bordere" id="comiteReview">
+    <thead>
+        <tr>
+            <th>Paper</th>
+            <th>Description</th>
+            <th>Post Date</th>
+            <th>Main Topic</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+@Html.Partial("_ParticipantsFilesModal")
+
+@section scripts{
+    <script>
+
+        const Loader = (Target, isShowed) => {
+
+            const div = document.getElementById(Target);
+
+            if (isShowed) {
+                return div.innerHTML = `
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-grow text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                                `
+            }
+            else if (!isShowed) {
+                return div.innerHTML = "";
+            }
+        }
+
+
+        var all = $("#comiteReview").DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: `@Url.Action("ComiteLecture", "Main")?idusuario=${sessionStorage.getItem('idUsuario')}`,
+                type: 'POST',
+                dataType: 'json'
+            },
+            pageLength: 10,
+            responsive: 1,
+            columns: [
+                { data: "Tema" },
+                { data: "Descripcion" },
+                { data: "FechaRegistro" },
+                { data: "Linea" },
+                { data: "Estatus" }
+            ]
+        })
+
+        $('#comiteReview tbody').on('click', 'tr', function () {
+            var result = all.row(this).data();
+
+            $.ajax({
+                url: '@Url.Action("LectureDetail", "Main")?id=' + result.IdPonencia,
+                method: 'GET',
+                success: (resp) => {
+
+                    console.log(resp.Archivos[1])
+
+                    var alertClass = "";
+                    var id = result.IdPonencia;
+
+                    $('#idponencia').val(id);
+
+                    const handleAlertComponent = (style) => {
+                        return $(`<div id="alertEstatus" class="alert ${style} col-md-6" role="alert">
+                                                <p id="Paragrah"></p >
+                                            </div >`);
+                    }
+
+                    switch (resp.Ponencia.Estatus) {
+
+                        case "Submitted":
+
+                            $("#btnUpdateFiles").attr('disabled', true);
+                            $("#Cover").attr('disabled', true);
+                            $("#Lecture").attr('disabled', true);
+
+                            alertClass = "alert-warning";
+                            $("#alertEstatus").html(handleAlertComponent(alertClass));
+
+                            break;
+
+                        case "In Review":
+
+                            $("#btnUpdateFiles").attr('disabled', true);
+                            $("#Cover").attr('disabled', true);
+                            $("#Lecture").attr('disabled', true);
+
+                            alertClass = "alert-primary";
+                            $("#alertEstatus").html(handleAlertComponent(alertClass));
+
+                        break;
+
+                        case "Approved":
+
+                            $("#btnUpdateFiles").attr('disabled', true);
+                            $("#Cover").attr('disabled', true);
+                            $("#Lecture").attr('disabled', true);
+                            alertClass = "alert-success";
+                            $("#alertEstatus").html(handleAlertComponent(alertClass));
+                            break;
+
+                        case "Rejected":
+
+                            $("#btnUpdateFiles").attr('disabled', true);
+                            $("#Cover").attr('disabled', true);
+                            $("#Lecture").attr('disabled', true);
+
+                            alertClass = "alert-danger";
+                            $("#alertEstatus").html(handleAlertComponent(alertClass));
+
+                            break;
+
+                        case "Second Review":
+
+                            $("#btnUpdateFiles").removeAttr('disabled');
+                            $("#Cover").attr('disabled', true);
+                            $("#Lecture").removeAttr('disabled');
+
+                            alertClass = "alert-info";
+                            $("#alertEstatus").html(handleAlertComponent(alertClass));
+
+                            break;
+
+                        case "Incomplete Submission":
+
+                            $("#btnUpdateFiles").removeAttr('disabled');
+                            $("#Cover").removeAttr('disabled');
+                            $("#Lecture").removeAttr('disabled');
+
+                            alertClass = "alert-danger";
+                            $("#alertEstatus").html(handleAlertComponent(alertClass));
+
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    var estatus = $(`<p class='card-title'>Status: ${resp.Ponencia.Estatus}</p>`);
+                    $("#Paragrah").html(estatus);
+
+                    $("#description").val(resp.Ponencia.Descripcion);
+                    $("#idponencia").val(resp.Ponencia.IdPonencia);
+                    $("#line").val(resp.Ponencia.Linea);
+                    $("#titlePaper").val(resp.Ponencia.Tema);
+
+                    $("#colaboradores").addClass('d-none');
+
+                    //Resetea la tabla de archivivos
+                    $("#rowFiles").html("");
+
+                    console.log(resp)
+
+                    //Tabla de Archivos
+                    resp.Archivos.map(items => {
+
+                        var Archivos = $(`
+                                <tr id="${items.IdTipoArchivo}">
+                                    <td>${items.TipoArchivo}</td>
+                                    <td>${items.Archivo}</td>
+                                    <td>${items.FechaRegistro}</td>
+                                    <td><a class="fa fa-upload" href="@Url.Action("DownLoadManul","Main")?filename=${items.Archivo}"></a></td>
+                                </tr>
+                            `);
+
+                        $('#1').css("display", "none");
+                        $('#rowFiles').append(Archivos);
+
+                    })
+
+
+                    $('#comentarios').addClass('d-none');
+
+                    $("#formInputFile").addClass('d-none');
+                    $('#assessment').removeClass('d-none');
+                    $("#staticBackdrop").modal("show");
+                }
+            })
+
+
+        });
+
+        //Eventos del modal
+        $('#CreateSheet').on('click', (e) => {
+            e.preventDefault();
+
+            sessionStorage.setItem('IdPonencia', $('#idponencia').val())
+            Loader("sheetLoader", true);
+            
+            window.location.href = '@Url.Action("Index", "Assessment")';
+            Loader("sheetLoader", false);
+               
+        });
+
+    </script>
+}
+
